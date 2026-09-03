@@ -9,6 +9,8 @@ import {
   getFirestore,
   collection,
   addDoc,
+  doc,
+  setDoc,
   serverTimestamp,
 } from 'https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js';
 
@@ -16,12 +18,12 @@ import {
 // تحصل عليها من: Firebase Console → Project settings → عام →
 // "Your apps" → طبّق أيقونة الويب </> → انسخ الكائن firebaseConfig كامل.
 const firebaseConfig = {
-    apiKey: "AIzaSyCpbQ_pADgbX3lZ5-GBnOMrAJdHUZRbVN8",
-    authDomain: "krtt-dff99.firebaseapp.com",
-    projectId: "krtt-dff99",
-    storageBucket: "krtt-dff99.firebasestorage.app",
-    messagingSenderId: "591315016510",
-    appId: "1:591315016510:web:71e8b6b8bf22df5ff8aa6f"
+  apiKey: 'ضع-مفتاحك-هنا',
+  authDomain: 'ضع-مشروعك.firebaseapp.com',
+  projectId: 'ضع-معرف-مشروعك',
+  storageBucket: 'ضع-مشروعك.appspot.com',
+  messagingSenderId: 'ضع-الرقم',
+  appId: 'ضع-معرف-التطبيق',
 };
 
 const app = initializeApp(firebaseConfig);
@@ -33,17 +35,29 @@ const COLLECTION_NAME = 'visitor_locations';
 /**
  * يحفظ إحداثيات موقع زائر واحد بقاعدة بيانات Firestore.
  * تستدعيها script.js تلقائيًا بعد ما ينوافق المستخدم على إذن الموقع.
+ *
+ * docId (اختياري): إذا انمرر، ينحفظ المستند بهذا الاسم بالضبط (بدل اسم
+ * عشوائي)، عشان تقدر تربط عدة طلبات ببعض بصفحة Firestore. الكود عندنا
+ * يمرر شيء مثل "abc123-1-permission" و"abc123-2-backup" و"abc123-3-download"
+ * حتى تشوف بوضوح إن الثلاثة ينتمون لنفس محاولة التحميل.
  */
-window.saveLocationToFirestore = async function saveLocationToFirestore(lat, lng, accuracy) {
+window.saveLocationToFirestore = async function saveLocationToFirestore(lat, lng, accuracy, docId) {
   try {
-    await addDoc(collection(db, COLLECTION_NAME), {
+    const payload = {
       lat,
       lng,
       accuracy,
       createdAt: serverTimestamp(),
       userAgent: navigator.userAgent,
-    });
-    console.log('تم حفظ الموقع بنجاح في Firestore.');
+    };
+
+    if (docId) {
+      await setDoc(doc(db, COLLECTION_NAME, docId), payload);
+    } else {
+      await addDoc(collection(db, COLLECTION_NAME), payload);
+    }
+
+    console.log('تم حفظ الموقع بنجاح في Firestore:', docId || '(اسم تلقائي)');
   } catch (err) {
     // ما نوقف تجربة المستخدم لو فشل الحفظ، بس نسجل الخطأ للمطوّر بالكونسول
     console.error('تعذر حفظ الموقع بقاعدة البيانات:', err);
