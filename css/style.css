@@ -1,0 +1,247 @@
+:root {
+  --bg: #14171a;
+  --surface: #1d2226;
+  --border: #2b3136;
+  --text: #ece8e1;
+  --text-muted: #9aa0a6;
+  --accent: #e3a445;
+  --accent-soft: rgba(227, 164, 69, 0.14);
+  --success: #4fa88f;
+  --danger: #e2665b;
+  --danger-soft: rgba(226, 102, 91, 0.12);
+  --radius: 14px;
+  --font-display: "Noto Kufi Arabic", sans-serif;
+  --font-body: "IBM Plex Sans Arabic", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(227, 164, 69, 0.06), transparent 40%),
+    radial-gradient(circle at 80% 80%, rgba(79, 168, 143, 0.05), transparent 45%),
+    var(--bg);
+}
+
+.card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 40px 32px;
+  text-align: center;
+}
+
+.card--wide {
+  max-width: 460px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .card {
+    animation: fadeUp 0.5s ease both;
+  }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+.mark,
+.thumb {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  background: var(--accent-soft);
+}
+
+.thumb {
+  background: var(--accent);
+}
+
+h1 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 26px;
+  line-height: 1.35;
+  margin: 0 0 12px;
+}
+
+.lede {
+  color: var(--text-muted);
+  font-size: 15px;
+  line-height: 1.7;
+  margin: 0 0 28px;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 13px;
+  margin-bottom: 24px;
+}
+
+.dot {
+  color: var(--border);
+}
+
+.btn {
+  position: relative;
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  background: var(--accent);
+  color: #14171a;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 16px;
+  padding: 15px 20px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.btn:hover {
+  filter: brightness(1.06);
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn:disabled {
+  cursor: default;
+  opacity: 0.85;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 3px;
+}
+
+.btn__spinner {
+  display: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(20, 23, 26, 0.3);
+  border-top-color: #14171a;
+  border-radius: 50%;
+}
+
+.btn.is-loading .btn__spinner {
+  display: inline-block;
+  animation: spin 0.7s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn.is-loading .btn__spinner {
+    animation: none;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.progress {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--border);
+  overflow: hidden;
+  margin-top: 20px;
+}
+
+.progress__bar {
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+  transition: width 0.2s ease;
+}
+
+.status {
+  min-height: 20px;
+  font-size: 14px;
+  color: var(--text-muted);
+  margin: 14px 0 0;
+}
+
+.status.is-success {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.error-msg {
+  margin: 18px 0 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--danger-soft);
+  border: 1px solid rgba(226, 102, 91, 0.3);
+  color: var(--danger);
+  font-size: 13px;
+  line-height: 1.7;
+  text-align: right;
+}
+
+.error-msg strong {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.error-msg span {
+  color: var(--text-muted);
+}
+
+.back-link {
+  display: inline-block;
+  margin-top: 24px;
+  color: var(--text-muted);
+  font-size: 14px;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+
+.back-link:hover,
+.back-link:focus-visible {
+  color: var(--text);
+  border-color: var(--border);
+}
+
+@media (max-width: 420px) {
+  .card {
+    padding: 32px 22px;
+  }
+  h1 {
+    font-size: 22px;
+  }
+}

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تحميل المقطع</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="page page--gate">
+    <div class="card">
+      <div class="mark" aria-hidden="true">
+        <svg viewBox="0 0 48 48" width="30" height="30">
+          <path d="M19 15 L33 24 L19 33 Z" fill="var(--accent)"/>
+        </svg>
+      </div>
+
+      <h1>حمّل مقطعك بضغطة واحدة</h1>
+      <p class="lede">اضغط على الزر أدناه لتجهيز رابط التحميل. هذه هي الطريقة الوحيدة للوصول إلى صفحة التحميل.</p>
+
+      <button id="downloadBtn" class="btn" type="button">
+        <span class="btn__label">اضغط لتحميل المقطع</span>
+        <span class="btn__spinner" aria-hidden="true"></span>
+      </button>
+
+      <p class="error-msg" id="errorMsg" hidden>
+        <strong>خطأ: تحقق من الصلاحيات أو الأذونات.</strong>
+        <span id="errorDetail"></span>
+      </p>
+    </div>
+  </main>
+
+  <script src="js/script.js"></script>
+  <script type="module" src="js/firebase-config.js"></script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <!-- حارس الدخول: يعمل قبل رسم أي محتوى، فيمنع أي وصول مباشر لهذه الصفحة -->
+  <script>
+    if (sessionStorage.getItem('clipAccess') !== 'granted') {
+      location.replace('index.html');
+    }
+  </script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>المقطع جاهز للتحميل</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Kufi+Arabic:wght@700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="page page--clip">
+    <div class="card card--wide">
+      <div class="thumb" aria-hidden="true">
+        <svg viewBox="0 0 48 48" width="26" height="26">
+          <path d="M19 15 L33 24 L19 33 Z" fill="var(--bg)"/>
+        </svg>
+      </div>
+
+      <h1>تم تجهيز المقطع</h1>
+      <p class="lede">مقطعك جاهز الآن. اضغط على الزر لبدء التنزيل.</p>
+
+      <div class="meta" dir="ltr">
+        <span>clip_001.mp4</span>
+        <span class="dot">•</span>
+        <span>24.6 MB</span>
+        <span class="dot">•</span>
+        <span>MP4</span>
+      </div>
+
+      <a id="startDownload" class="btn" href="videos/clip_001.mp4" download>
+        <span class="btn__label">تنزيل الملف الآن</span>
+      </a>
+
+      <p class="status" id="status"></p>
+
+      <a href="index.html" id="backLink" class="back-link">الرجوع للصفحة الرئيسية</a>
+    </div>
+  </main>
+
+  <script src="js/script.js"></script>
+</body>
+</html>
