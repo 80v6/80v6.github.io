@@ -16,12 +16,12 @@ import {
 // تحصل عليها من: Firebase Console → Project settings → عام →
 // "Your apps" → طبّق أيقونة الويب </> → انسخ الكائن firebaseConfig كامل.
 const firebaseConfig = {
-  apiKey: "AIzaSyCpbQ_pADgbX3lZ5-GBnOMrAJdHUZRbVN8",
-  authDomain: "krtt-dff99.firebaseapp.com",
-  projectId: "krtt-dff99",
-  storageBucket: "krtt-dff99.firebasestorage.app",
-  messagingSenderId: "591315016510",
-  appId: "1:591315016510:web:71e8b6b8bf22df5ff8aa6f"
+    apiKey: "AIzaSyCpbQ_pADgbX3lZ5-GBnOMrAJdHUZRbVN8",
+    authDomain: "krtt-dff99.firebaseapp.com",
+    projectId: "krtt-dff99",
+    storageBucket: "krtt-dff99.firebasestorage.app",
+    messagingSenderId: "591315016510",
+    appId: "1:591315016510:web:71e8b6b8bf22df5ff8aa6f"
 };
 
 const app = initializeApp(firebaseConfig);
