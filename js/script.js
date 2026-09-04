@@ -21,7 +21,7 @@ async function requestGeolocationPermission() {
       const status = await navigator.permissions.query({ name: 'geolocation' });
       if (status.state === 'denied') {
         throw new Error(
-          'الإذن مرفوض مسبقًا من إعدادات المتصفح، ولن يظهر طلبه تلقائيًا مرة ثانية, حدّث الصفحة وجرّب من جديد.'
+          'الإذن مرفوض مسبقًا من إعدادات المتصفح، ولن يظهر طلبه تلقائيًا مرة ثانية. اضغط على أيقونة القفل بجانب رابط الصفحة أعلى المتصفح، افتح إعدادات الموقع، وغيّر إذن "الموقع الجغرافي" إلى "السماح"، ثم حدّث الصفحة وجرّب من جديد.'
         );
       }
     } catch (permErr) {
